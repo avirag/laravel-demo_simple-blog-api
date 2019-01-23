@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Resources\UserResource;
 use App\User;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -13,9 +13,10 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return UserResource::collection(User::paginate(5));
+        $users = User::paginate($request->get('page_size', 10));
+        return UserResource::collection($users);
     }
 
     /**
