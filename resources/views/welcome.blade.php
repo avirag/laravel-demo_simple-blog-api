@@ -27,9 +27,7 @@
                 </div>
             @endif
 
-            <div id="app">
-                <example-component></example-component>
-            </div>
+            <div id="app"></div>
         </div>
         <script src="{{asset('js/app.js')}}"></script>
     </body>
