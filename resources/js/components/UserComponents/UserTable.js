@@ -226,24 +226,33 @@ class EnhancedTable extends React.Component {
     orderBy: "calories",
     selected: [],
     data: [],
-    page: 0,
-    rowsPerPage: 5
+    links: null,
+    perPage: 5,
+    total: 0,
+    currentPage: 0,
   };
 
-  componentDidMount() {
-    axios.get("/api/users").then(response => {
+  getUserList() {
+    const {perPage} = this.state;
+
+    axios.get(`/api/users?page_size=${perPage}`).then(response => {
       const content = response.data;
 
       if (!content) {
         return;
       }
 
-      console.log(content.data);
-
       this.setState({
-        data: content.data
+        data: content.data,
+        perPage: content.meta.per_page,
+        total: content.meta.total,
+        currentPage: content.meta.current_page
       });
     });
+  }
+
+  componentDidMount() {
+    this.getUserList();
   }
 
   handleRequestSort = (event, property) => {
@@ -291,16 +300,19 @@ class EnhancedTable extends React.Component {
   };
 
   handleChangeRowsPerPage = event => {
-    this.setState({ rowsPerPage: event.target.value });
+    this.getUserList();
   };
 
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
   render() {
+
+    // console.log(this.state);return <h2>HEllo</h2>;
+
     const { classes } = this.props;
-    const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
+    const { data, order, orderBy, selected, perPage, total, currentPage } = this.state;
     const emptyRows =
-      rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
+      perPage - Math.min(perPage, total - currentPage * perPage);
 
     return (
       <Paper className={classes.root}>
@@ -317,7 +329,7 @@ class EnhancedTable extends React.Component {
             />
             <TableBody>
               {stableSort(data, getSorting(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .slice(currentPage * perPage, currentPage * perPage + perPage)
                 .map(user => {
                   const isSelected = this.isSelected(user.id);
                   return (
@@ -355,9 +367,9 @@ class EnhancedTable extends React.Component {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={data.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
+          count={total}
+          rowsPerPage={perPage}
+          page={currentPage}
           backIconButtonProps={{
             "aria-label": "Previous Page"
           }}
