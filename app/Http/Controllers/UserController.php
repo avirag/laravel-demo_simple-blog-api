@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    const DEFAULT_PAGE_SIZE = 15;
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +16,8 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $users = User::paginate($request->get('page_size', 10));
+        $pageSize = $request->get('page_size', self::DEFAULT_PAGE_SIZE);
+        $users = User::paginate(intval($pageSize));
         return UserResource::collection($users);
     }
 

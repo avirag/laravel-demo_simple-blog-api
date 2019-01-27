@@ -1,30 +1,15 @@
 import React from "react";
-import classNames from "classnames";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
-import TableSortLabel from "@material-ui/core/TableSortLabel";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import Checkbox from "@material-ui/core/Checkbox";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
-import DeleteIcon from "@material-ui/icons/Delete";
-import FilterListIcon from "@material-ui/icons/FilterList";
-import { lighten } from "@material-ui/core/styles/colorManipulator";
-import Axios from "axios";
-
-let counter = 0;
-function createData(name, calories, fat, carbs, protein) {
-  counter += 1;
-  return { id: counter, name, calories, fat, carbs, protein };
-}
+import UserTableHead from "./UserTableHead";
+import UserTableToolbar from "./UserTableToolbar";
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -52,161 +37,6 @@ function getSorting(order, orderBy) {
     : (a, b) => -desc(a, b, orderBy);
 }
 
-const rows = [
-  {
-    id: "name",
-    numeric: false,
-    disablePadding: true,
-    label: "Name"
-  },
-  { id: "username", numeric: true, disablePadding: false, label: "Username" },
-  { id: "email", numeric: true, disablePadding: false, label: "Email" },
-  { id: "phone", numeric: true, disablePadding: false, label: "Phone" },
-  { id: "website", numeric: true, disablePadding: false, label: "Website" },
-  {
-    id: "company.name",
-    numeric: true,
-    disablePadding: false,
-    label: "Company name"
-  }
-];
-
-class EnhancedTableHead extends React.Component {
-  createSortHandler = property => event => {
-    this.props.onRequestSort(event, property);
-  };
-
-  render() {
-    const {
-      onSelectAllClick,
-      order,
-      orderBy,
-      numSelected,
-      rowCount
-    } = this.props;
-
-    return (
-      <TableHead>
-        <TableRow>
-          <TableCell padding="checkbox">
-            <Checkbox
-              indeterminate={numSelected > 0 && numSelected < rowCount}
-              checked={numSelected === rowCount}
-              onChange={onSelectAllClick}
-            />
-          </TableCell>
-          {rows.map(
-            row => (
-              <TableCell
-                key={row.id}
-                align={row.numeric ? "right" : "left"}
-                padding={row.disablePadding ? "none" : "default"}
-                sortDirection={orderBy === row.id ? order : false}
-              >
-                <Tooltip
-                  title="Sort"
-                  placement={row.numeric ? "bottom-end" : "bottom-start"}
-                  enterDelay={300}
-                >
-                  <TableSortLabel
-                    active={orderBy === row.id}
-                    direction={order}
-                    onClick={this.createSortHandler(row.id)}
-                  >
-                    {row.label}
-                  </TableSortLabel>
-                </Tooltip>
-              </TableCell>
-            ),
-            this
-          )}
-        </TableRow>
-      </TableHead>
-    );
-  }
-}
-
-EnhancedTableHead.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.string.isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired
-};
-
-const toolbarStyles = theme => ({
-  root: {
-    paddingRight: theme.spacing.unit
-  },
-  highlight:
-    theme.palette.type === "light"
-      ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
-        }
-      : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark
-        },
-  spacer: {
-    flex: "1 1 100%"
-  },
-  actions: {
-    color: theme.palette.text.secondary
-  },
-  title: {
-    flex: "0 0 auto"
-  }
-});
-
-let EnhancedTableToolbar = props => {
-  const { numSelected, classes } = props;
-
-  return (
-    <Toolbar
-      className={classNames(classes.root, {
-        [classes.highlight]: numSelected > 0
-      })}
-    >
-      <div className={classes.title}>
-        {numSelected > 0 ? (
-          <Typography color="inherit" variant="subtitle1">
-            {numSelected} selected
-          </Typography>
-        ) : (
-          <Typography variant="h6" id="tableTitle">
-            Users
-          </Typography>
-        )}
-      </div>
-      <div className={classes.spacer} />
-      <div className={classes.actions}>
-        {numSelected > 0 ? (
-          <Tooltip title="Delete">
-            <IconButton aria-label="Delete">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <Tooltip title="Filter list">
-            <IconButton aria-label="Filter list">
-              <FilterListIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-      </div>
-    </Toolbar>
-  );
-};
-
-EnhancedTableToolbar.propTypes = {
-  classes: PropTypes.object.isRequired,
-  numSelected: PropTypes.number.isRequired
-};
-
-EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar);
-
 const styles = theme => ({
   root: {
     width: "100%",
@@ -220,7 +50,7 @@ const styles = theme => ({
   }
 });
 
-class EnhancedTable extends React.Component {
+class UserTable extends React.Component {
   state = {
     order: "asc",
     orderBy: "calories",
@@ -229,13 +59,11 @@ class EnhancedTable extends React.Component {
     links: null,
     perPage: 5,
     total: 0,
-    currentPage: 0,
+    currentPage: 1,
   };
 
-  getUserList() {
-    const {perPage} = this.state;
-
-    axios.get(`/api/users?page_size=${perPage}`).then(response => {
+  getUserList(pageSize, page) {
+    axios.get(`/api/users?page_size=${pageSize}&page=${page}`).then(response => {
       const content = response.data;
 
       if (!content) {
@@ -244,15 +72,15 @@ class EnhancedTable extends React.Component {
 
       this.setState({
         data: content.data,
-        perPage: content.meta.per_page,
         total: content.meta.total,
+        perPage: content.meta.per_page,
         currentPage: content.meta.current_page
       });
     });
   }
 
-  componentDidMount() {
-    this.getUserList();
+  componentDidMount() {    
+    this.getUserList(this.state.perPage, this.state.currentPage);
   }
 
   handleRequestSort = (event, property) => {
@@ -295,31 +123,31 @@ class EnhancedTable extends React.Component {
     this.setState({ selected: newSelected });
   };
 
-  handleChangePage = (event, page) => {
-    this.setState({ page });
+  handleChangePage = (event, page) => {    
+    this.getUserList(this.state.perPage, page + 1);
   };
 
   handleChangeRowsPerPage = event => {
-    this.getUserList();
+    const pageSize = parseInt(event.target.value);
+    this.getUserList(pageSize, 1);
   };
 
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
-  render() {
-
-    // console.log(this.state);return <h2>HEllo</h2>;
+  render() {    
+    console.log(this.state);
 
     const { classes } = this.props;
     const { data, order, orderBy, selected, perPage, total, currentPage } = this.state;
     const emptyRows =
-      perPage - Math.min(perPage, total - currentPage * perPage);
+      perPage - Math.min(perPage, total - (currentPage - 1) * perPage);
 
     return (
       <Paper className={classes.root}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <UserTableToolbar numSelected={selected.length} />
         <div className={classes.tableWrapper}>
           <Table className={classes.table} aria-labelledby="tableTitle">
-            <EnhancedTableHead
+            <UserTableHead
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
@@ -329,8 +157,7 @@ class EnhancedTable extends React.Component {
             />
             <TableBody>
               {stableSort(data, getSorting(order, orderBy))
-                .slice(currentPage * perPage, currentPage * perPage + perPage)
-                .map(user => {
+                .map(user => {                  
                   const isSelected = this.isSelected(user.id);
                   return (
                     <TableRow
@@ -369,7 +196,7 @@ class EnhancedTable extends React.Component {
           component="div"
           count={total}
           rowsPerPage={perPage}
-          page={currentPage}
+          page={currentPage - 1}
           backIconButtonProps={{
             "aria-label": "Previous Page"
           }}
@@ -384,8 +211,8 @@ class EnhancedTable extends React.Component {
   }
 }
 
-EnhancedTable.propTypes = {
+UserTable.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(EnhancedTable);
+export default withStyles(styles)(UserTable);
