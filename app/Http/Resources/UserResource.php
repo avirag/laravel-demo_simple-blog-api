@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Company;
 
 class UserResource extends JsonResource
 {
@@ -21,7 +22,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'website' => $this->website,
-            'company' => new CompanyResource($this->company)
+            'company' => new CompanyResource(Company::find($this->company_id))
         ];
     }
 }

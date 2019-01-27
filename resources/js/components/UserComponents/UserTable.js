@@ -11,31 +11,6 @@ import Checkbox from "@material-ui/core/Checkbox";
 import UserTableHead from "./UserTableHead";
 import UserTableToolbar from "./UserTableToolbar";
 
-function desc(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function stableSort(array, cmp) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = cmp(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map(el => el[0]);
-}
-
-function getSorting(order, orderBy) {
-  return order === "desc"
-    ? (a, b) => desc(a, b, orderBy)
-    : (a, b) => -desc(a, b, orderBy);
-}
 
 const styles = theme => ({
   root: {
@@ -53,7 +28,7 @@ const styles = theme => ({
 class UserTable extends React.Component {
   state = {
     order: "asc",
-    orderBy: "calories",
+    orderBy: "id",
     selected: [],
     data: [],
     links: null,
@@ -63,7 +38,9 @@ class UserTable extends React.Component {
   };
 
   getUserList(pageSize, page) {
-    axios.get(`/api/users?page_size=${pageSize}&page=${page}`).then(response => {
+    const { order, orderBy } = this.state;
+
+    axios.get(`/api/users?page_size=${pageSize}&page=${page}&order=${order}&sort=${orderBy}`).then(response => {
       const content = response.data;
 
       if (!content) {
@@ -79,19 +56,20 @@ class UserTable extends React.Component {
     });
   }
 
-  componentDidMount() {    
+  componentDidMount() {
     this.getUserList(this.state.perPage, this.state.currentPage);
   }
 
   handleRequestSort = (event, property) => {
     const orderBy = property;
-    let order = "desc";
+    let order = "asc";
 
-    if (this.state.orderBy === property && this.state.order === "desc") {
-      order = "asc";
+    if (this.state.orderBy === property && this.state.order === "asc") {
+      order = "desc";
     }
 
-    this.setState({ order, orderBy });
+    this.setState({ order, orderBy }, () => this.getUserList(this.state.perPage, this.state.currentPage));
+
   };
 
   handleSelectAllClick = event => {
@@ -123,7 +101,7 @@ class UserTable extends React.Component {
     this.setState({ selected: newSelected });
   };
 
-  handleChangePage = (event, page) => {    
+  handleChangePage = (event, page) => {
     this.getUserList(this.state.perPage, page + 1);
   };
 
@@ -134,7 +112,7 @@ class UserTable extends React.Component {
 
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
-  render() {    
+  render() {
     console.log(this.state);
 
     const { classes } = this.props;
@@ -156,8 +134,7 @@ class UserTable extends React.Component {
               rowCount={data.length}
             />
             <TableBody>
-              {stableSort(data, getSorting(order, orderBy))
-                .map(user => {                  
+              {data.map(user => {
                   const isSelected = this.isSelected(user.id);
                   return (
                     <TableRow
