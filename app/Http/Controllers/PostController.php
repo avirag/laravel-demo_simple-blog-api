@@ -3,19 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Resources\PostResource;
 use App\Post;
 
 class PostController extends Controller
 {
+    const DEFAULT_PAGE_SIZE = 15;
+    const DEFAULT_SORT = 'id';
+    const DEFAULT_ORDER = 'asc';
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return PostResource::collection(Post::all());
+        $pageSize = $request->get('page_size', self::DEFAULT_PAGE_SIZE);
+        $sort = $request->get('sort', self::DEFAULT_SORT);
+        $order = $request->get('order', self::DEFAULT_ORDER);
+
+        $posts = DB::table('posts')
+            ->orderBy($sort, $order)
+            ->paginate(intval($pageSize));
+        return PostResource::collection($posts);
     }
 
     /**

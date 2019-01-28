@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Resources\UserResource;
 use App\User;
 
 class UserController extends Controller
@@ -12,6 +12,7 @@ class UserController extends Controller
     const DEFAULT_PAGE_SIZE = 15;
     const DEFAULT_SORT = 'id';
     const DEFAULT_ORDER = 'asc';
+
     /**
      * Display a listing of the resource.
      *
@@ -22,6 +23,7 @@ class UserController extends Controller
         $pageSize = $request->get('page_size', self::DEFAULT_PAGE_SIZE);
         $sort = $request->get('sort', self::DEFAULT_SORT);
         $order = $request->get('order', self::DEFAULT_ORDER);
+
         $users = DB::table('users')
             ->orderBy($sort, $order)
             ->paginate(intval($pageSize));

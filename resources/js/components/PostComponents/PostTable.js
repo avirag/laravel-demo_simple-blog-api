@@ -1,204 +1,19 @@
 import React from "react";
-import classNames from "classnames";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
-import TableSortLabel from "@material-ui/core/TableSortLabel";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import Checkbox from "@material-ui/core/Checkbox";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
-import DeleteIcon from "@material-ui/icons/Delete";
-import FilterListIcon from "@material-ui/icons/FilterList";
-import { lighten } from "@material-ui/core/styles/colorManipulator";
-
-let counter = 0;
-function createData(name, calories, fat, carbs, protein) {
-  counter += 1;
-  return { id: counter, name, calories, fat, carbs, protein };
-}
-
-function desc(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function stableSort(array, cmp) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = cmp(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map(el => el[0]);
-}
-
-function getSorting(order, orderBy) {
-  return order === "desc"
-    ? (a, b) => desc(a, b, orderBy)
-    : (a, b) => -desc(a, b, orderBy);
-}
-
-const rows = [
-  {
-    id: "name",
-    numeric: false,
-    disablePadding: true,
-    label: "Dessert (100g serving)"
-  },
-  { id: "calories", numeric: true, disablePadding: false, label: "Calories" },
-  { id: "fat", numeric: true, disablePadding: false, label: "Fat (g)" },
-  { id: "carbs", numeric: true, disablePadding: false, label: "Carbs (g)" },
-  { id: "protein", numeric: true, disablePadding: false, label: "Protein (g)" }
-];
-
-class EnhancedTableHead extends React.Component {
-  createSortHandler = property => event => {
-    this.props.onRequestSort(event, property);
-  };
-
-  render() {
-    const {
-      onSelectAllClick,
-      order,
-      orderBy,
-      numSelected,
-      rowCount
-    } = this.props;
-
-    return (
-      <TableHead>
-        <TableRow>
-          <TableCell padding="checkbox">
-            <Checkbox
-              indeterminate={numSelected > 0 && numSelected < rowCount}
-              checked={numSelected === rowCount}
-              onChange={onSelectAllClick}
-            />
-          </TableCell>
-          {rows.map(
-            row => (
-              <TableCell
-                key={row.id}
-                align={row.numeric ? "right" : "left"}
-                padding={row.disablePadding ? "none" : "default"}
-                sortDirection={orderBy === row.id ? order : false}
-              >
-                <Tooltip
-                  title="Sort"
-                  placement={row.numeric ? "bottom-end" : "bottom-start"}
-                  enterDelay={300}
-                >
-                  <TableSortLabel
-                    active={orderBy === row.id}
-                    direction={order}
-                    onClick={this.createSortHandler(row.id)}
-                  >
-                    {row.label}
-                  </TableSortLabel>
-                </Tooltip>
-              </TableCell>
-            ),
-            this
-          )}
-        </TableRow>
-      </TableHead>
-    );
-  }
-}
-
-EnhancedTableHead.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.string.isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired
-};
-
-const toolbarStyles = theme => ({
-  root: {
-    paddingRight: theme.spacing.unit
-  },
-  highlight:
-    theme.palette.type === "light"
-      ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
-        }
-      : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark
-        },
-  spacer: {
-    flex: "1 1 100%"
-  },
-  actions: {
-    color: theme.palette.text.secondary
-  },
-  title: {
-    flex: "0 0 auto"
-  }
-});
-
-let EnhancedTableToolbar = props => {
-  const { numSelected, classes } = props;
-
-  return (
-    <Toolbar
-      className={classNames(classes.root, {
-        [classes.highlight]: numSelected > 0
-      })}
-    >
-      <div className={classes.title}>
-        {numSelected > 0 ? (
-          <Typography color="inherit" variant="subtitle1">
-            {numSelected} selected
-          </Typography>
-        ) : (
-          <Typography variant="h6" id="tableTitle">
-            Nutrition
-          </Typography>
-        )}
-      </div>
-      <div className={classes.spacer} />
-      <div className={classes.actions}>
-        {numSelected > 0 ? (
-          <Tooltip title="Delete">
-            <IconButton aria-label="Delete">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <Tooltip title="Filter list">
-            <IconButton aria-label="Filter list">
-              <FilterListIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-      </div>
-    </Toolbar>
-  );
-};
-
-EnhancedTableToolbar.propTypes = {
-  classes: PropTypes.object.isRequired,
-  numSelected: PropTypes.number.isRequired
-};
-
-EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar);
+import PostTableHead from "./PostTableHead";
+import PostTableToolbar from "./PostTableToolbar";
+import IconButton from '@material-ui/core/IconButton';
+import AddIcon from '@material-ui/icons/Add';
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const styles = theme => ({
   root: {
@@ -213,29 +28,40 @@ const styles = theme => ({
   }
 });
 
-class EnhancedTable extends React.Component {
+class PostTable extends React.Component {
   state = {
     order: "asc",
-    orderBy: "calories",
+    orderBy: "id",
     selected: [],
-    data: [
-      createData("Cupcake", 305, 3.7, 67, 4.3),
-      createData("Donut", 452, 25.0, 51, 4.9),
-      createData("Eclair", 262, 16.0, 24, 6.0),
-      createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-      createData("Gingerbread", 356, 16.0, 49, 3.9),
-      createData("Honeycomb", 408, 3.2, 87, 6.5),
-      createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-      createData("Jelly Bean", 375, 0.0, 94, 0.0),
-      createData("KitKat", 518, 26.0, 65, 7.0),
-      createData("Lollipop", 392, 0.2, 98, 0.0),
-      createData("Marshmallow", 318, 0, 81, 2.0),
-      createData("Nougat", 360, 19.0, 9, 37.0),
-      createData("Oreo", 437, 18.0, 63, 4.0)
-    ],
-    page: 0,
-    rowsPerPage: 5
+    data: [],
+    links: null,
+    perPage: 5,
+    total: 0,
+    currentPage: 1,
   };
+
+  componentDidMount() {
+    this.getPostList(this.state.perPage, this.state.currentPage);
+  }
+
+  getPostList(pageSize, page) {
+    const { order, orderBy } = this.state;
+
+    axios.get(`/api/posts?page_size=${pageSize}&page=${page}&order=${order}&sort=${orderBy}`).then(response => {
+      const content = response.data;
+
+      if (!content) {
+        return;
+      }
+
+      this.setState({
+        data: content.data,
+        total: content.meta.total,
+        perPage: content.meta.per_page,
+        currentPage: content.meta.current_page
+      });
+    });
+  }
 
   handleRequestSort = (event, property) => {
     const orderBy = property;
@@ -245,7 +71,7 @@ class EnhancedTable extends React.Component {
       order = "asc";
     }
 
-    this.setState({ order, orderBy });
+    this.setState({ order, orderBy }, () => this.getPostList(this.state.perPage, this.state.currentPage));
   };
 
   handleSelectAllClick = event => {
@@ -278,27 +104,36 @@ class EnhancedTable extends React.Component {
   };
 
   handleChangePage = (event, page) => {
-    this.setState({ page });
+    this.getPostList(this.state.perPage, page + 1);
   };
 
   handleChangeRowsPerPage = event => {
-    this.setState({ rowsPerPage: event.target.value });
+    const pageSize = parseInt(event.target.value);
+    this.getPostList(pageSize, 1);
   };
 
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
+  handleEditClick = (event, id) => {
+    console.log('edit clicked');
+  }
+
+  handleDeleteClick = (event, id) => {
+    console.log('delete clicked');
+  }
+
   render() {
     const { classes } = this.props;
-    const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
+    const { data, order, orderBy, selected, perPage, total, currentPage } = this.state;
     const emptyRows =
-      rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
+      perPage - Math.min(perPage, total - (currentPage - 1) * perPage);
 
     return (
       <Paper className={classes.root}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <PostTableToolbar numSelected={selected.length} />
         <div className={classes.tableWrapper}>
           <Table className={classes.table} aria-labelledby="tableTitle">
-            <EnhancedTableHead
+            <PostTableHead
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
@@ -307,36 +142,40 @@ class EnhancedTable extends React.Component {
               rowCount={data.length}
             />
             <TableBody>
-              {stableSort(data, getSorting(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map(n => {
-                  const isSelected = this.isSelected(n.id);
+              {
+                data.map(post => {
+                  const isSelected = this.isSelected(post.id);
                   return (
                     <TableRow
                       hover
-                      onClick={event => this.handleClick(event, n.id)}
                       role="checkbox"
                       aria-checked={isSelected}
                       tabIndex={-1}
-                      key={n.id}
+                      key={post.id}
                       selected={isSelected}
                     >
-                      <TableCell padding="checkbox">
+                      <TableCell padding="checkbox" onClick={event => this.handleClick(event, post.id)}>
                         <Checkbox checked={isSelected} />
                       </TableCell>
                       <TableCell component="th" scope="row" padding="none">
-                        {n.name}
+                        {post.title}
                       </TableCell>
-                      <TableCell align="right">{n.calories}</TableCell>
-                      <TableCell align="right">{n.fat}</TableCell>
-                      <TableCell align="right">{n.carbs}</TableCell>
-                      <TableCell align="right">{n.protein}</TableCell>
+                      <TableCell align="right">{post.body}</TableCell>
+                      <TableCell align="right">{post.user_id}</TableCell>
+                      <TableCell align="right">
+                        <IconButton onClick={event => this.handleEditClick(event, post.id)}>
+                          <EditIcon /> Edit
+                        </IconButton>
+                        <IconButton onClick={event => this.handleDeleteClick(event, post.id)}>
+                          <DeleteIcon /> Delete
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 49 * emptyRows }}>
-                  <TableCell colSpan={6} />
+                  <TableCell colSpan={7} />
                 </TableRow>
               )}
             </TableBody>
@@ -345,9 +184,9 @@ class EnhancedTable extends React.Component {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={data.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
+          count={total}
+          rowsPerPage={perPage}
+          page={currentPage - 1}
           backIconButtonProps={{
             "aria-label": "Previous Page"
           }}
@@ -362,8 +201,8 @@ class EnhancedTable extends React.Component {
   }
 }
 
-EnhancedTable.propTypes = {
+PostTable.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(EnhancedTable);
+export default withStyles(styles)(PostTable);
